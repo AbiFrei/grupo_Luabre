@@ -1,0 +1,14 @@
+[project]
+name = "ranking-licitaciones"
+version = "0.1.0"
+description = "Rankear empresas por probabilidad de ganar una licitación: datos, baseline B0 y evaluación."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "pyarrow>=14",
+]
+
+[tool.uv]
+package = false
