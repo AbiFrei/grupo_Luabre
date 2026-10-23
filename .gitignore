@@ -9,3 +9,6 @@ __pycache__/
 *.py[cod]
 .venv/
 .ipynb_checkpoints/
+
+# Archivos de validación propios (se generan en el notebook)
+*.parquet
