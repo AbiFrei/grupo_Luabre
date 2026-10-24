@@ -246,7 +246,7 @@ B0+TF-IDF en prueba (2024S1), con el alpha elegido en selección:
 - El texto mejora a B0 de forma significativa en d, it, r y j. En rd el signo es el mismo pero el IC95 cruza 0 (pocas licitaciones).
 - La mejora está en S_new (B0 no ve al ganador): Δ MRR rd +0.026, d +0.119, it +0.029, r +0.048, j +0.016, todos con IC95 positivo.
 - En S_inc el MRR no cambia de forma significativa, pero el Hit@5 baja en rd (0.812 a 0.688), d (0.769 a 0.731), it (0.823 a 0.581) y r (0.809 a 0.757); en j queda igual.
-- Un alpha global de 1 queda en el mejor valor o a menos de 0.01 de él en las cinco verticales; en j los alphas altos (1.5 y 2) empeoran a B0 de forma significativa.
+- Un alpha global de 1 queda en el mejor valor o a menos de 0.01 de él en las cinco verticales; en j el alpha 2.0 queda significativamente por debajo de B0 en selección (Δ -0.042, IC95 -0.055 a -0.030) y en prueba (Δ -0.021, IC95 -0.037 a -0.004), y el 1.5 no se distingue de B0 (selección -0.009, IC95 -0.019 a +0.003; prueba +0.003, IC95 -0.011 a +0.017).
 
 ## Experimentación v (continuación): embeddings en las cinco verticales (experimento_emb.py)
 
@@ -264,8 +264,41 @@ Mezcla (mejor alpha en selección) en prueba, contra la base TF-IDF y contra B0:
 | r | 1.5 | 0.270 | 0.237 | 0.194 | +0.033 (+0.021, +0.047) | +0.076 (+0.053, +0.099) |
 | j | 1.5 | 0.176 | 0.151 | 0.136 | +0.025 (+0.017, +0.032) | +0.040 (+0.028, +0.052) |
 
-- La mezcla mejora de forma significativa a la base TF-IDF en it, r y j (en selección y en prueba). En d mejora en selección (+0.024, IC95 +0.013 a +0.036) pero en prueba no alcanza significancia (+0.008, IC95 -0.005 a +0.021); en rd no mejora.
+- La mezcla mejora de forma significativa a la base TF-IDF en it, r y j (en selección y en prueba). En d mejora en selección (+0.024, IC95 +0.013 a +0.036) pero en prueba no alcanza significancia (+0.008, IC95 -0.005 a +0.021); en rd mejora en selección (+0.016, IC95 +0.006 a +0.030) pero en prueba no se distingue (-0.002, IC95 -0.024 a +0.022), con solo 57 licitaciones.
 - En r y j mejora también S_inc contra B0 (r +0.066, IC95 +0.020 a +0.115; j +0.036, IC95 +0.001 a +0.075). En it el Hit@5 de S_inc baja (0.823 a 0.516).
 - El mejor alpha de la mezcla es 1.5 en rd, it, r y j (2.0 en d, borde de la grilla): un alpha global de 1.5 es el mejor en it, r y j, y en d queda a 0.002 del mejor en selección (0.180 contra 0.182).
 - Los embeddings solos tienen su mejor alpha en el borde de la grilla (2.0) en d, it, r y j: la grilla era corta. Pendiente: grilla hasta 6 y un modelo más potente (all-mpnet-base-v2, 384 tokens).
 - Conclusión provisoria: con licitaciones suficientes (it, r, j) los embeddings suman sobre TF-IDF; en rd (57 licitaciones de prueba) no se podía ver.
+
+
+## Experimentación vii: grilla extendida y comparación de modelos de embeddings (experimento_emb.py)
+
+Se repite la mezcla TF-IDF + embeddings con alphas 0, 0.5, 1, 1.5, 2, 3, 4 y 6 (`--alphas`), con all-MiniLM-L6-v2 (256 tokens) y con
+all-mpnet-base-v2 (768 dimensiones, 384 tokens, `--modelo all-mpnet-base-v2 --largo 384`). Mismo corte cronológico y misma regla de decisión.
+
+Mejor alpha en selección (2023) y su MRR, MiniLM, grilla extendida:
+
+| vertical | TF-IDF solo | embeddings solos | mezcla |
+|---|---|---|---|
+| rd | 1.0 (0.142) | 1.0 (0.138) | 1.5 (0.159) |
+| d | 1.5 (0.158) | 3.0 (0.179) | 2.0 (0.182) |
+| it | 1.0 (0.120) | 2.0 (0.132) | 1.5 (0.148) |
+| r | 1.0 (0.232) | 2.0 (0.249) | 1.5 (0.251) |
+| j | 1.0 (0.206) | 2.0 (0.220) | 1.5 (0.227) |
+
+Mezcla en prueba (2024S1), con el alpha elegido en selección, contra la base TF-IDF:
+
+| vertical | MiniLM: alpha | MRR | Δ vs base TF-IDF | mpnet: alpha | MRR | Δ vs base TF-IDF |
+|---|--:|--:|---|--:|--:|---|
+| rd | 1.5 | 0.110 | -0.002 (-0.024, +0.022) | 1.5 | 0.112 | -0.000 (-0.022, +0.023) |
+| d | 2.0 | 0.212 | +0.008 (-0.005, +0.021) | 3.0 | 0.222 | +0.019 (+0.005, +0.034) |
+| it | 1.5 | 0.138 | +0.027 (+0.014, +0.041) | 1.5 | 0.140 | +0.029 (+0.017, +0.041) |
+| r | 1.5 | 0.270 | +0.033 (+0.021, +0.047) | 1.5 | 0.266 | +0.029 (+0.018, +0.040) |
+| j | 1.5 | 0.176 | +0.022 (+0.016, +0.029) | 1.5 | 0.174 | +0.021 (+0.015, +0.026) |
+
+- Con la grilla extendida los embeddings solos tienen su máximo dentro de la grilla, no en el borde. La mezcla mantiene su mejor alpha en 1.5 (2.0 con MiniLM y 3.0 con mpnet en d).
+- El mejor MRR de la mezcla en selección es casi igual con los dos modelos (diferencia de 0.004 o menos) y en prueba la diferencia es de 0.010 o menos, con signo cambiante. mpnet no supera a MiniLM; el método usa MiniLM.
+- mpnet tarda entre 1.3 y 1.8 veces más que la primera corrida de MiniLM (que también calculó los vectores): rd 43 s contra 78 s, d 92 contra 164, it 164 contra 284, r 377 contra 658, j 298 contra 381.
+- Un alpha global de 1.5 queda a 0.002 (MiniLM) o 0.004 (mpnet) del mejor en selección en d, y es el mejor en las otras cuatro verticales.
+- Hit@5 de S_inc con la mezcla (MiniLM) contra B0: rd 0.562 contra 0.812, d 0.769 contra 0.769, it 0.516 contra 0.823, r 0.763 contra 0.809, j 0.678 contra 0.690. Los grupos S_inc son chicos en rd (16 licitaciones) y d (26).
+- Con esta grilla la base TF-IDF de j queda en alpha 1.0 (empata con 0.75 en selección), por eso el Δ de j contra la base es +0.022 y no +0.025 como en la Experimentación v.
