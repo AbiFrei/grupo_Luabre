@@ -71,3 +71,41 @@ por bootstrap pareado (remuestreando licitaciones).
 - El puesto mediano no se compara entre filas: se calcula sobre conjuntos distintos de licitaciones.
 - alpha = 0,5 se eligió mirando esta misma validación, así que el +0,024 es algo optimista.
   Próximo paso: elegir alpha con 2023 y medir una sola vez en 2024S1.
+
+## Experimento 2: validación cronológica (selección 2023, prueba 2024S1) — vertical `rd`
+
+**Esquema**
+- Selección: licitaciones de 2023 (130 licitaciones, 217 ganadoras). Se usa para elegir alpha.
+- Prueba: 2024S1 (57 licitaciones, 87 ganadoras). Se mide una sola vez con el alpha elegido.
+- El vocabulario TF-IDF de cada semestre se aprende solo con contratos anteriores al inicio de ese semestre.
+- Regla de elección fijada de antemano: el alpha con mayor MRR en selección.
+
+**Selección (2023)**
+
+| alpha | MRR | Hit@5 | Hit@1 | Δ MRR vs B0 | IC95 del Δ | Hit@100 | Recall@100 |
+|---|---|---|---|---|---|---|---|
+| 0 (B0) | 0,125 | 0,246 | 0,069 | 0,000 | (0,000; 0,000) | 0,638 | 0,535 |
+| 0,05 | 0,124 | 0,246 | 0,069 | −0,001 | (−0,004; +0,002) | 0,631 | 0,525 |
+| 0,1 | 0,126 | 0,254 | 0,069 | +0,001 | (−0,004; +0,005) | 0,615 | 0,519 |
+| 0,25 | 0,127 | 0,269 | 0,069 | +0,002 | (−0,006; +0,010) | 0,585 | 0,497 |
+| 0,5 | 0,131 | 0,285 | 0,069 | +0,006 | (−0,008; +0,020) | 0,577 | 0,485 |
+| 0,75 | 0,134 | 0,300 | 0,077 | +0,009 | (−0,011; +0,031) | 0,577 | 0,478 |
+| **1** | **0,143** | 0,269 | 0,092 | **+0,018** | (−0,010; +0,048) | 0,569 | 0,466 |
+| 1,5 | 0,136 | 0,223 | 0,085 | +0,011 | (−0,027; +0,054) | 0,538 | 0,441 |
+| 2 | 0,137 | 0,185 | 0,092 | +0,012 | (−0,029; +0,058) | 0,523 | 0,431 |
+
+**Prueba (2024S1), alpha = 1**
+
+| alpha | MRR | Hit@5 | Hit@1 | Δ MRR vs B0 | IC95 del Δ | Hit@100 | Recall@100 |
+|---|---|---|---|---|---|---|---|
+| 1 | 0,112 | 0,228 | 0,070 | +0,021 | (−0,008; +0,056) | 0,509 | 0,443 |
+
+(B0 en prueba: MRR 0,091, Hit@5 0,228, Hit@1 0,053.)
+
+**Lectura**
+- Con validación limpia, la mejora de B0 + TF-IDF sobre el B0 es positiva (+0,021) pero no significativa: el IC95 incluye el 0.
+- En el Experimento 1 parecía significativa porque alpha se elegía y se medía en las mismas licitaciones.
+- La señal de texto es inestable: en 2023 ayuda menos que en 2024 y, al subir alpha, baja el Hit@100
+  (0,638 → 0,523): el texto saca de la lista a ganadoras que el B0 encontraba.
+- Próximos pasos: variantes de la representación del texto (lematizar, SVD, embeddings, comparar contrato
+  por contrato) con este mismo esquema, y repetir en una vertical grande para achicar los intervalos.
