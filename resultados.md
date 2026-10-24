@@ -260,12 +260,12 @@ Mezcla (mejor alpha en selección) en prueba, contra la base TF-IDF y contra B0:
 |---|--:|--:|--:|--:|---|---|
 | rd | 1.5 | 0.110 | 0.112 | 0.091 | -0.002 (-0.024, +0.022) | +0.020 (-0.023, +0.068) |
 | d | 2.0 | 0.212 | 0.203 | 0.090 | +0.008 (-0.005, +0.021) | +0.122 (+0.075, +0.171) |
-| it | 1.5 | 0.138 | 0.111 | 0.088 | +0.027 (IC95 bajo +0.014) | +0.050 (+0.026, +0.076) |
+| it | 1.5 | 0.138 | 0.111 | 0.088 | +0.027 (+0.014, +0.041) | +0.050 (+0.026, +0.076) |
 | r | 1.5 | 0.270 | 0.237 | 0.194 | +0.033 (+0.021, +0.047) | +0.076 (+0.053, +0.099) |
 | j | 1.5 | 0.176 | 0.151 | 0.136 | +0.025 (+0.017, +0.032) | +0.040 (+0.028, +0.052) |
 
-- La mezcla mejora de forma significativa a la base TF-IDF en it, r y j (en selección y en prueba). En d va en la misma dirección sin alcanzar significancia, y en rd no mejora.
+- La mezcla mejora de forma significativa a la base TF-IDF en it, r y j (en selección y en prueba). En d mejora en selección (+0.024, IC95 +0.013 a +0.036) pero en prueba no alcanza significancia (+0.008, IC95 -0.005 a +0.021); en rd no mejora.
 - En r y j mejora también S_inc contra B0 (r +0.066, IC95 +0.020 a +0.115; j +0.036, IC95 +0.001 a +0.075). En it el Hit@5 de S_inc baja (0.823 a 0.516).
-- El mejor alpha de la mezcla es 1.5 en rd, it, r y j (2.0 en d, borde de la grilla): un alpha global de 1.5 queda a menos de 0.002 del mejor en selección.
+- El mejor alpha de la mezcla es 1.5 en rd, it, r y j (2.0 en d, borde de la grilla): un alpha global de 1.5 es el mejor en it, r y j, y en d queda a 0.002 del mejor en selección (0.180 contra 0.182).
 - Los embeddings solos tienen su mejor alpha en el borde de la grilla (2.0) en d, it, r y j: la grilla era corta. Pendiente: grilla hasta 6 y un modelo más potente (all-mpnet-base-v2, 384 tokens).
 - Conclusión provisoria: con licitaciones suficientes (it, r, j) los embeddings suman sobre TF-IDF; en rd (57 licitaciones de prueba) no se podía ver.
