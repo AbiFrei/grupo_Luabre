@@ -3,7 +3,7 @@
 Registro de cada experimento: qué se probó, con qué configuración y qué métricas dio.
 Se agrega una sección por experimento. Es la base del informe de enfoques estudiados.
 
-## Experimento 1: B0 + TF-IDF (vertical `rd`)
+## Experimentación 0 (notebook: celdas #7 a #13): B0 + TF-IDF (vertical `rd`)
 
 **Configuración**
 - Vertical: `rd` (328 licitaciones en total).
@@ -48,9 +48,9 @@ Se agrega una sección por experimento. Es la base del informe de enfoques estud
 - [ ] Embeddings de oraciones.
 - [ ] LightGBM (lambdarank) con `p_b0`, similitudes y otras señales como features.
 
-## Experimento 1b: mejora sobre el B0 con intervalo (vertical `rd`)
+## Experimentación 0, continuación: mejora sobre el B0 con intervalo (vertical `rd`)
 
-Misma configuración que el Experimento 1. La evaluación usa `evaluar.py` como módulo y compara
+Misma configuración que la Experimentación 0. La evaluación usa `evaluar.py` como módulo y compara
 contra el ranking del B0 en las mismas 57 licitaciones de validación. El intervalo es un IC95
 por bootstrap pareado (remuestreando licitaciones).
 
@@ -72,7 +72,7 @@ por bootstrap pareado (remuestreando licitaciones).
 - alpha = 0,5 se eligió mirando esta misma validación, así que el +0,024 es algo optimista.
   Próximo paso: elegir alpha con 2023 y medir una sola vez en 2024S1.
 
-## Experimento 2: validación cronológica (selección 2023, prueba 2024S1) — vertical `rd`
+## Experimentación i (notebook: celdas #14 a #18): validación cronológica (selección 2023, prueba 2024S1) — vertical `rd`
 
 **Esquema**
 - Selección: licitaciones de 2023 (130 licitaciones, 217 ganadoras). Se usa para elegir alpha.
@@ -104,8 +104,38 @@ por bootstrap pareado (remuestreando licitaciones).
 
 **Lectura**
 - Con validación limpia, la mejora de B0 + TF-IDF sobre el B0 es positiva (+0,021) pero no significativa: el IC95 incluye el 0.
-- En el Experimento 1 parecía significativa porque alpha se elegía y se medía en las mismas licitaciones.
+- En la Experimentación 0 parecía significativa porque alpha se elegía y se medía en las mismas licitaciones.
 - La señal de texto es inestable: en 2023 ayuda menos que en 2024 y, al subir alpha, baja el Hit@100
   (0,638 → 0,523): el texto saca de la lista a ganadoras que el B0 encontraba.
 - Próximos pasos: variantes de la representación del texto (lematizar, SVD, embeddings, comparar contrato
   por contrato) con este mismo esquema, y repetir en una vertical grande para achicar los intervalos.
+
+## Experimentación ii (notebook: celdas #19 a #23): lematizar y recortar a la raíz — vertical `rd`
+
+**Qué se probó.** TF-IDF compara palabras exactas ("service" y "services" son términos distintos).
+Se probaron dos formas de normalizar las palabras al tokenizar, antes de armar los vectores:
+- **Lematizar** (WordNet): forma de diccionario ("laboratories" → "laboratory").
+- **Recortar a la raíz** (Snowball): corta terminaciones con reglas fijas ("laboratories" → "laboratori").
+
+Todo lo demás igual que en la Experimentación i (B0, mezcla con alpha, selección 2023, prueba 2024S1).
+
+**Regla de decisión (fijada antes de mirar).** Cada variante usa su mejor alpha en selección y se compara contra
+el TF-IDF base licitación por licitación (IC95 por bootstrap pareado). Se adopta solo si el IC95 del Δ es todo positivo.
+
+**Resultado en selección (2023, 130 licitaciones)**
+
+| Variante | Mejor alpha | MRR | Δ vs TF-IDF base | IC95 del Δ | Mejoran / empeoran / iguales |
+|---|---|---|---|---|---|
+| TF-IDF base | 1 | 0,143 | — | — | — |
+| Lematizado | 1 | 0,144 | +0,001 | (−0,002; +0,006) | 27 / 21 / 82 |
+| Raíz | 1 | 0,140 | −0,002 | (−0,014; +0,007) | 35 / 23 / 72 |
+
+**Lectura**
+- Lematizar da prácticamente lo mismo que el base: mejoras y empeoramientos se cancelan.
+- Recortar a la raíz mejora más licitaciones de las que empeora (35 contra 23), pero el MRR promedio baja:
+  mejora un poco a ganadoras que estaban abajo y empeora a unas pocas que estaban arriba
+  (en el MRR, bajar del puesto 1 al 2 cuesta 0,5; subir del 50 al 20 suma 0,03).
+- Ningún IC95 es todo positivo: se mantiene el TF-IDF base y no se mide nada nuevo en prueba.
+  El resultado reportado sigue siendo el de la Experimentación i (MRR 0,112 contra 0,091 del B0 en 2024S1).
+- Conclusión: las diferencias de forma de las palabras no son el problema principal del texto.
+  La hipótesis siguiente es un problema de significado (sinónimos, temas): SVD y embeddings.
