@@ -162,3 +162,30 @@ del TF-IDF, y TF-IDF + 0,5 × SVD 100 (peso fijado de antemano). Misma regla de 
 - Se mantiene el TF-IDF base; no se mide nada nuevo en prueba (sigue valiendo la Experimentación i).
 - Conclusión: los temas son demasiado generales y pierden las palabras raras que identifican a la empresa correcta.
   Junto con la Experimentación ii: lo que sirve del texto son las coincidencias de palabras específicas.
+
+
+## Experimentación v: embeddings (all-MiniLM-L6-v2)
+
+Un vector por contrato (modelo all-MiniLM-L6-v2, 384 dimensiones, hasta 256 tokens),
+promedio por empresa con contratos anteriores al corte de cada semestre. Se probaron
+embeddings solos y mezclados mitad y mitad con TF-IDF, sobre B0.
+
+| alpha | B0+TF-IDF (base) | B0+embeddings | B0+mezcla TF-IDF y emb |
+|------:|-----------------:|--------------:|-----------------------:|
+| 0.00 | 0.125 | 0.125 | 0.125 |
+| 0.05 | 0.124 | 0.128 | 0.126 |
+| 0.10 | 0.126 | 0.130 | 0.129 |
+| 0.25 | 0.127 | 0.133 | 0.133 |
+| 0.50 | 0.129 | 0.134 | 0.135 |
+| 0.75 | 0.133 | 0.135 | 0.143 |
+| 1.00 | 0.142 | 0.138 | 0.145 |
+| 1.50 | 0.137 | 0.137 | 0.159 |
+| 2.00 | 0.138 | 0.136 | 0.153 |
+
+- Selección (2023): mejor = mezcla con alpha 1.5 (MRR 0.159). Δ vs base = +0.016,
+  IC95 [+0.006; +0.030]; 55 mejoran, 19 empeoran, 56 iguales. La regla fijada indica pasar a prueba.
+- Prueba (2024S1): base 0.112, nueva 0.110. Δ = -0.002, IC95 [-0.024; +0.022];
+  12 mejoran, 11 empeoran, 34 iguales. No hay mejora medible.
+- Lectura: la ventaja de selección es en parte optimista (se eligió la mejor de 18
+  combinaciones sobre los mismos datos con que se mide). Con 57 licitaciones de prueba
+  solo se detectan diferencias grandes. En rd, los embeddings no aportan una mejora medible.
