@@ -216,3 +216,56 @@ S_inc = licitaciones donde B0 pone un ganador en su top-10; S_new = el resto.
 - La mezcla con embeddings no supera a B0+TF-IDF en S_new en prueba (+0.024 contra +0.026).
 - Los grupos se definen con el resultado de B0: la mejora en S_new es en parte esperable
   y no se puede usar el grupo para decidir al predecir.
+
+
+## Experimentación vi: B0 y B0+TF-IDF en las cinco verticales (experimento.py)
+
+Mismo método que la Experimentación i, pero en rd, d, it, r y j: selección 2023, prueba 2024S1, alpha elegido
+en selección por MRR. Se corre con `python experimento.py <vertical>` (necesita `b0_<vertical>.csv`, que genera `b0.py`).
+
+B0 sobre todas las licitaciones de cada vertical:
+
+| vertical | licitaciones | MRR | Hit@5 | Hit@1 | Hit@100 | puesto mediano |
+|---|--:|--:|--:|--:|--:|--:|
+| rd | 328 | 0.125 | 0.271 | 0.079 | 0.628 | 9 |
+| d | 819 | 0.092 | 0.112 | 0.056 | 0.410 | 15 |
+| it | 1792 | 0.081 | 0.125 | 0.035 | 0.410 | 15 |
+| r | 2180 | 0.175 | 0.239 | 0.118 | 0.525 | 7 |
+| j | 4504 | 0.164 | 0.222 | 0.103 | 0.543 | 9 |
+
+B0+TF-IDF en prueba (2024S1), con el alpha elegido en selección:
+
+| vertical | alpha | N | MRR | B0 MRR | Δ MRR | IC95 |
+|---|--:|--:|--:|--:|--:|---|
+| rd | 1.0 | 57 | 0.112 | 0.091 | +0.021 | (-0.008, +0.056) |
+| d | 1.5 | 161 | 0.203 | 0.090 | +0.113 | (+0.065, +0.164) |
+| it | 1.0 | 319 | 0.111 | 0.088 | +0.023 | (+0.006, +0.041) |
+| r | 1.0 | 468 | 0.237 | 0.194 | +0.043 | (+0.026, +0.060) |
+| j | 0.75 | 995 | 0.151 | 0.136 | +0.015 | (+0.008, +0.023) |
+
+- El texto mejora a B0 de forma significativa en d, it, r y j. En rd el signo es el mismo pero el IC95 cruza 0 (pocas licitaciones).
+- La mejora está en S_new (B0 no ve al ganador): Δ MRR rd +0.026, d +0.119, it +0.029, r +0.048, j +0.016, todos con IC95 positivo.
+- En S_inc el MRR no cambia de forma significativa, pero el Hit@5 baja en rd (0.812 a 0.688), d (0.769 a 0.731), it (0.823 a 0.581) y r (0.809 a 0.757); en j queda igual.
+- Un alpha global de 1 queda en el mejor valor o a menos de 0.01 de él en las cinco verticales; en j los alphas altos (1.5 y 2) empeoran a B0 de forma significativa.
+
+## Experimentación v (continuación): embeddings en las cinco verticales (experimento_emb.py)
+
+Modelo all-MiniLM-L6-v2 (256 tokens), un vector por contrato y promedio por empresa con corte cronológico.
+La mezcla suma la similitud TF-IDF y 0.5 veces la de embeddings (cada una normalizada por su máximo). Se corre con
+`python experimento_emb.py <verticales>` y necesita GPU y sentence-transformers.
+
+Mezcla (mejor alpha en selección) en prueba, contra la base TF-IDF y contra B0:
+
+| vertical | alpha | MRR mezcla | MRR base TF-IDF | MRR B0 | Δ vs base TF-IDF | Δ vs B0 |
+|---|--:|--:|--:|--:|---|---|
+| rd | 1.5 | 0.110 | 0.112 | 0.091 | -0.002 (-0.024, +0.022) | +0.020 (-0.023, +0.068) |
+| d | 2.0 | 0.212 | 0.203 | 0.090 | +0.008 (-0.005, +0.021) | +0.122 (+0.075, +0.171) |
+| it | 1.5 | 0.138 | 0.111 | 0.088 | +0.027 (IC95 bajo +0.014) | +0.050 (+0.026, +0.076) |
+| r | 1.5 | 0.270 | 0.237 | 0.194 | +0.033 (+0.021, +0.047) | +0.076 (+0.053, +0.099) |
+| j | 1.5 | 0.176 | 0.151 | 0.136 | +0.025 (+0.017, +0.032) | +0.040 (+0.028, +0.052) |
+
+- La mezcla mejora de forma significativa a la base TF-IDF en it, r y j (en selección y en prueba). En d va en la misma dirección sin alcanzar significancia, y en rd no mejora.
+- En r y j mejora también S_inc contra B0 (r +0.066, IC95 +0.020 a +0.115; j +0.036, IC95 +0.001 a +0.075). En it el Hit@5 de S_inc baja (0.823 a 0.516).
+- El mejor alpha de la mezcla es 1.5 en rd, it, r y j (2.0 en d, borde de la grilla): un alpha global de 1.5 queda a menos de 0.002 del mejor en selección.
+- Los embeddings solos tienen su mejor alpha en el borde de la grilla (2.0) en d, it, r y j: la grilla era corta. Pendiente: grilla hasta 6 y un modelo más potente (all-mpnet-base-v2, 384 tokens).
+- Conclusión provisoria: con licitaciones suficientes (it, r, j) los embeddings suman sobre TF-IDF; en rd (57 licitaciones de prueba) no se podía ver.
