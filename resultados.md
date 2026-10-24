@@ -189,3 +189,30 @@ embeddings solos y mezclados mitad y mitad con TF-IDF, sobre B0.
 - Lectura: la ventaja de selección es en parte optimista (se eligió la mejor de 18
   combinaciones sobre los mismos datos con que se mide). Con 57 licitaciones de prueba
   solo se detectan diferencias grandes. En rd, los embeddings no aportan una mejora medible.
+
+
+### Experimentación v: desglose por S_inc y S_new
+
+S_inc = licitaciones donde B0 pone un ganador en su top-10; S_new = el resto.
+Δ MRR es contra B0, con IC95 por bootstrap pareado.
+
+| etapa | método | conjunto | N | MRR | B0 MRR | Δ MRR | IC95 | Hit@5 | B0 Hit@5 |
+|---|---|---|--:|--:|--:|--:|---|--:|--:|
+| selección 2023 | B0+TF-IDF | todas | 130 | 0.142 | 0.125 | +0.017 | (-0.010, +0.047) | 0.269 | 0.246 |
+| selección 2023 | B0+TF-IDF | S_inc | 41 | 0.346 | 0.361 | -0.015 | (-0.074, +0.053) | 0.659 | 0.780 |
+| selección 2023 | B0+TF-IDF | S_new | 89 | 0.048 | 0.016 | +0.032 | (+0.007, +0.064) | 0.090 | 0.000 |
+| selección 2023 | mezcla TF-IDF y emb | todas | 130 | 0.159 | 0.125 | +0.034 | (+0.002, +0.070) | 0.285 | 0.246 |
+| selección 2023 | mezcla TF-IDF y emb | S_inc | 41 | 0.354 | 0.361 | -0.007 | (-0.065, +0.063) | 0.683 | 0.780 |
+| selección 2023 | mezcla TF-IDF y emb | S_new | 89 | 0.068 | 0.016 | +0.052 | (+0.017, +0.094) | 0.101 | 0.000 |
+| prueba 2024S1 | B0+TF-IDF | todas | 57 | 0.112 | 0.091 | +0.021 | (-0.008, +0.056) | 0.228 | 0.228 |
+| prueba 2024S1 | B0+TF-IDF | S_inc | 16 | 0.304 | 0.294 | +0.010 | (-0.079, +0.128) | 0.688 | 0.812 |
+| prueba 2024S1 | B0+TF-IDF | S_new | 41 | 0.037 | 0.011 | +0.026 | (+0.005, +0.051) | 0.049 | 0.000 |
+| prueba 2024S1 | mezcla TF-IDF y emb | todas | 57 | 0.110 | 0.091 | +0.020 | (-0.023, +0.068) | 0.211 | 0.228 |
+| prueba 2024S1 | mezcla TF-IDF y emb | S_inc | 16 | 0.301 | 0.294 | +0.007 | (-0.130, +0.181) | 0.562 | 0.812 |
+| prueba 2024S1 | mezcla TF-IDF y emb | S_new | 41 | 0.036 | 0.011 | +0.024 | (+0.005, +0.049) | 0.073 | 0.000 |
+
+- El texto mejora en S_new de forma consistente (IC95 positivo en selección y en prueba).
+- En S_inc el MRR no cambia de forma medible, pero el Hit@5 baja (en prueba N = 16).
+- La mezcla con embeddings no supera a B0+TF-IDF en S_new en prueba (+0.024 contra +0.026).
+- Los grupos se definen con el resultado de B0: la mejora en S_new es en parte esperable
+  y no se puede usar el grupo para decidir al predecir.
