@@ -139,3 +139,26 @@ el TF-IDF base licitación por licitación (IC95 por bootstrap pareado). Se adop
   El resultado reportado sigue siendo el de la Experimentación i (MRR 0,112 contra 0,091 del B0 en 2024S1).
 - Conclusión: las diferencias de forma de las palabras no son el problema principal del texto.
   La hipótesis siguiente es un problema de significado (sinónimos, temas): SVD y embeddings.
+
+## Experimentación iii (notebook: celdas #24 a #27): SVD (temas) — vertical `rd`
+
+**Qué se probó.** SVD/LSA sobre el TF-IDF de los contratos del pasado: cada texto se representa por "temas"
+(combinaciones de palabras que aparecen juntas) en lugar de palabras exactas. Variantes: SVD 100 y SVD 300 en lugar
+del TF-IDF, y TF-IDF + 0,5 × SVD 100 (peso fijado de antemano). Misma regla de decisión que en la Experimentación ii.
+
+**Resultado en selección (2023, 130 licitaciones)**
+
+| Variante | Mejor alpha | MRR | Δ vs TF-IDF base | IC95 del Δ | Mejoran / empeoran / iguales |
+|---|---|---|---|---|---|
+| TF-IDF base | 1 | 0,143 | — | — | — |
+| SVD 100 | 0 (no usarla) | 0,125 | −0,018 | (−0,048; +0,010) | 50 / 35 / 45 |
+| SVD 300 | 0 (no usarla) | 0,125 | −0,018 | (−0,048; +0,010) | 50 / 35 / 45 |
+| TF-IDF + SVD 100 | 1,5 | 0,141 | −0,002 | (−0,015; +0,013) | 26 / 35 / 69 |
+
+**Lectura**
+- SVD sola empeora al B0 de forma significativa: con SVD 100 y alpha = 1, MRR 0,108 e IC95 del Δ contra el B0
+  de −0,031 a −0,005. Por eso su mejor alpha es 0. Con 300 temas empeora menos que con 100.
+- Sumada al TF-IDF no agrega nada.
+- Se mantiene el TF-IDF base; no se mide nada nuevo en prueba (sigue valiendo la Experimentación i).
+- Conclusión: los temas son demasiado generales y pierden las palabras raras que identifican a la empresa correcta.
+  Junto con la Experimentación ii: lo que sirve del texto son las coincidencias de palabras específicas.
