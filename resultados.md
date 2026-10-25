@@ -302,3 +302,47 @@ Mezcla en prueba (2024S1), con el alpha elegido en selección, contra la base TF
 - Un alpha global de 1.5 queda a 0.002 (MiniLM) o 0.004 (mpnet) del mejor en selección en d, y es el mejor en las otras cuatro verticales.
 - Hit@5 de S_inc con la mezcla (MiniLM) contra B0: rd 0.562 contra 0.812, d 0.769 contra 0.769, it 0.516 contra 0.823, r 0.763 contra 0.809, j 0.678 contra 0.690. Los grupos S_inc son chicos en rd (16 licitaciones) y d (26).
 - Con esta grilla la base TF-IDF de j queda en alpha 1.0 (empata con 0.75 en selección), por eso el Δ de j contra la base es +0.022 y no +0.025 como en la Experimentación v.
+
+
+## Experimentación viii: top protegido (experimento_top.py)
+
+Idea: respetar los k primeros puestos de B0 y usar la mezcla (TF-IDF + 0.5 de embeddings MiniLM) solo para ordenar del puesto k+1 en
+adelante, para no perder el Hit@5 de las licitaciones donde B0 ya tenía al ganador entre sus 10 primeras (S_inc). k = 0 es la mezcla de
+siempre. Para cada k se elige el alpha por MRR en selección (2023) y se mide en prueba (2024S1). Se corre con
+`python experimento_top.py <verticales>` (reutiliza los vectores guardados por experimento_emb.py).
+
+MRR en prueba, con el alpha elegido en selección para cada k (entre paréntesis):
+
+| vertical | B0 | k=0 | k=3 | k=5 | k=10 |
+|---|--:|--:|--:|--:|--:|
+| rd | 0.091 | 0.110 (1.5) | 0.097 (1.0) | 0.098 (0.5) | 0.094 (0.5) |
+| d | 0.090 | 0.212 (2.0) | 0.124 (1.0) | 0.114 (1.0) | 0.104 (1.0) |
+| it | 0.088 | 0.138 (1.5) | 0.104 (1.0) | 0.101 (1.0) | 0.096 (0.5) |
+| r | 0.194 | 0.270 (1.5) | 0.212 (0.5) | 0.207 (0.5) | 0.202 (0.5) |
+| j | 0.136 | 0.176 (1.5) | 0.152 (1.0) | 0.147 (0.5) | 0.143 (0.5) |
+
+Δ MRR en prueba contra la mezcla sin proteger (k=0), con IC95 por bootstrap pareado:
+
+| vertical | k=3 | k=5 | k=10 |
+|---|---|---|---|
+| rd | -0.013 (-0.057, +0.024) | -0.012 (-0.060, +0.028) | -0.016 (-0.064, +0.024) |
+| d | -0.087 (-0.127, -0.049) | -0.097 (-0.140, -0.055) | -0.108 (-0.154, -0.064) |
+| it | -0.034 (-0.055, -0.014) | -0.037 (-0.060, -0.016) | -0.042 (-0.067, -0.020) |
+| r | -0.059 (-0.080, -0.039) | -0.064 (-0.085, -0.042) | -0.069 (-0.091, -0.047) |
+| j | -0.024 (-0.034, -0.014) | -0.028 (-0.040, -0.017) | -0.033 (-0.044, -0.021) |
+
+Hit@5 en S_inc (prueba):
+
+| vertical | licitaciones S_inc | B0 | k=0 | k=3 | k=5 | k=10 |
+|---|--:|--:|--:|--:|--:|--:|
+| rd | 16 | 0.812 | 0.562 | 0.812 | 0.812 | 0.812 |
+| d | 26 | 0.769 | 0.769 | 0.885 | 0.769 | 0.769 |
+| it | 62 | 0.823 | 0.516 | 0.726 | 0.823 | 0.823 |
+| r | 152 | 0.809 | 0.763 | 0.875 | 0.809 | 0.809 |
+| j | 255 | 0.690 | 0.678 | 0.741 | 0.690 | 0.690 |
+
+- En selección k=0 tiene el mayor MRR en las cinco verticales y para todos los alphas probados. Contra k=0 el Δ MRR es significativamente negativo en d, it, r y j (en selección y en prueba, con los tres valores de k); en rd es negativo pero solo k=10 lo es en selección.
+- Con la regla de decisión (adoptar solo si el IC95 del Δ MRR contra k=0 es enteramente positivo) no se adopta ningún k.
+- Explicación: con los k primeros puestos fijos, un ganador que B0 no ve (S_new) no puede quedar por encima del puesto k+1. El MRR de S_new en prueba de k=0 a k=3 baja de 0.036 a 0.026 (rd), 0.132 a 0.049 (d), 0.070 a 0.032 (it), 0.095 a 0.039 (r) y 0.054 a 0.035 (j).
+- Con k=3 el Hit@5 de S_inc supera al de B0 en d, r y j, pero el costo en MRR, que es la métrica principal, es mayor que ese beneficio. La pérdida de Hit@5 en S_inc de la mezcla sin proteger (rd, it) queda registrada como costo del método.
+- Los grupos S_inc se definen por el resultado de B0 y no se pueden usar al predecir; además son chicos en rd (16 licitaciones) y d (26).
