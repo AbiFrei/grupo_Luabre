@@ -346,3 +346,53 @@ Hit@5 en S_inc (prueba):
 - Explicación: con los k primeros puestos fijos, un ganador que B0 no ve (S_new) no puede quedar por encima del puesto k+1. El MRR de S_new en prueba de k=0 a k=3 baja de 0.036 a 0.026 (rd), 0.132 a 0.049 (d), 0.070 a 0.032 (it), 0.095 a 0.039 (r) y 0.054 a 0.035 (j).
 - Con k=3 el Hit@5 de S_inc supera al de B0 en d, r y j, pero el costo en MRR, que es la métrica principal, es mayor que ese beneficio. La pérdida de Hit@5 en S_inc de la mezcla sin proteger (rd, it) queda registrada como costo del método.
 - Los grupos S_inc se definen por el resultado de B0 y no se pueden usar al predecir; además son chicos en rd (16 licitaciones) y d (26).
+
+
+## Experimentación ix: alpha global, por vertical y sin la vertical (analisis_alpha.py)
+
+Pregunta: ¿cuánto aporta conocer la vertical al elegir el alpha de la mezcla (TF-IDF + embeddings MiniLM) frente a aprenderlo de los datos?
+Se usan los archivos por licitación de la Experimentación vii (`por_licitacion_emb_ext_<V>.csv`) y se compara cómo elegir el alpha, siempre por
+MRR en selección (2023) y midiendo en prueba (2024S1): global (licitaciones de las cinco verticales juntas), por vertical (solo las de esa vertical)
+y sin la vertical (para cada vertical, con las otras cuatro). El techo (mejor alpha mirando la prueba) no es una regla utilizable: es lo máximo que
+podría ganar cualquier regla. Se corre con `python analisis_alpha.py`.
+
+MRR en selección (2023) por alpha:
+
+| alpha | rd | d | it | r | j | juntas | promedio de verticales |
+|--:|--:|--:|--:|--:|--:|--:|--:|
+| 0.0 | 0.125 | 0.110 | 0.090 | 0.194 | 0.183 | 0.160 | 0.141 |
+| 0.5 | 0.135 | 0.143 | 0.116 | 0.226 | 0.210 | 0.188 | 0.166 |
+| 1.0 | 0.145 | 0.163 | 0.130 | 0.245 | 0.223 | 0.202 | 0.181 |
+| 1.5 | 0.159 | 0.180 | 0.148 | 0.251 | 0.227 | 0.211 | 0.193 |
+| 2.0 | 0.153 | 0.182 | 0.142 | 0.242 | 0.217 | 0.203 | 0.187 |
+| 3.0 | 0.145 | 0.177 | 0.122 | 0.215 | 0.175 | 0.173 | 0.167 |
+| 4.0 | 0.143 | 0.173 | 0.116 | 0.200 | 0.154 | 0.158 | 0.157 |
+| 6.0 | 0.137 | 0.166 | 0.110 | 0.186 | 0.132 | 0.143 | 0.146 |
+
+Alphas elegidos: global 1.5 (tanto juntando licitaciones como promediando verticales); por vertical rd 1.5, d 2.0, it 1.5, r 1.5, j 1.5;
+sin la vertical 1.5 en las cinco; techo rd 1.0, d 3.0, it 1.5, r 1.5, j 1.5.
+
+MRR en prueba (2024S1) según cómo se elige el alpha:
+
+| regla | rd | d | it | r | j | juntas | promedio de verticales |
+|---|--:|--:|--:|--:|--:|--:|--:|
+| B0 | 0.091 | 0.090 | 0.088 | 0.194 | 0.136 | 0.137 | 0.120 |
+| alpha global | 0.110 | 0.210 | 0.138 | 0.270 | 0.176 | 0.193 | 0.181 |
+| alpha por vertical | 0.110 | 0.212 | 0.138 | 0.270 | 0.176 | 0.193 | 0.181 |
+| alpha sin la vertical | 0.110 | 0.210 | 0.138 | 0.270 | 0.176 | 0.193 | 0.181 |
+| techo (no utilizable) | 0.116 | 0.218 | 0.138 | 0.270 | 0.176 | 0.194 | 0.184 |
+
+Δ MRR en prueba con todas las licitaciones juntas (IC95 por bootstrap pareado):
+
+| comparación | Δ MRR | IC95 |
+|---|--:|---|
+| alpha global contra B0 | +0.0558 | (+0.0463, +0.0650) |
+| alpha por vertical contra alpha global | +0.0001 | (-0.0009, +0.0013) |
+| alpha sin la vertical contra alpha global | +0.0000 | (+0.0000, +0.0000) |
+| alpha sin la vertical contra alpha por vertical | -0.0001 | (-0.0013, +0.0009) |
+
+- Conocer la vertical no aporta de forma medible: con el alpha elegido sin mirar la vertical el resultado es idéntico al del alpha global, porque en cada vertical las otras cuatro eligen 1.5.
+- El único alpha por vertical distinto del global es el de d (2.0); su diferencia por vertical es +0.0017 (IC95 -0.0112 a +0.0160), no significativa.
+- El techo apenas supera a la regla global (0.194 contra 0.193 juntas), así que no queda margen relevante en ajustar el alpha por vertical.
+- Limitación: las cinco verticales tienen curvas de alpha parecidas; la conclusión vale para ellas. El método es el procedimiento (elegir el alpha con validación cronológica sobre los datos disponibles), no el valor 1.5.
+- B0 en prueba (2024S1) es el de las licitaciones de ese semestre; difiere del B0 sobre todas las licitaciones de cada vertical.
