@@ -73,7 +73,7 @@ con `--corte 2023-07-01` se mueve la ventana. `comparar_ranker.py` compara con e
 | `comparar_ranker.py` | compara el método con el ranker sin texto y con B0 (MRR y diferencia con IC95) |
 | `simular_test.py` | arma un test simulado con el formato del test oficial |
 | `prueba_pool.py` | cuántas ganadoras entran al pool de 200 según cómo se elige |
-| `experimento_emb.py`, `experimento_top.py`, `analisis_alpha.py`, `pipeline_tfidf.py` | experimentos de la primera etapa (B0 + texto) |
+| `experimento_emb.py`, `experimento_top.py`, `analisis_alpha.py` | experimentos de la primera etapa (B0 + texto) |
 | `b0.py`, `evaluar.py` | baseline y evaluador de la cátedra |
 | `resultados.md` | registro de todos los experimentos |
 | `ejecutable_NB_colab.ipynb` | notebook de Colab que reproduce todo |
