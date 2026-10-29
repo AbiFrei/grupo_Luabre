@@ -62,3 +62,9 @@ Los desempates y las semillas son fijos (semilla 42; desempate por SHA-256 del i
 embeddings de cada empresa se calculan solo con contratos anteriores al período que se predice. En el test se usa el historial
 de `data/` (termina el 30/6/2024) y la tabla de empresas del test, sin `semestre`. Dos corridas independientes dieron el mismo
 pool de entrenamiento y la misma iteración final del LightGBM en cada vertical.
+
+## Visibilidad del repositorio
+
+Dejamos el repositorio público a propósito. El ejecutable (`EJECUTABLE.py` y el notebook de Colab) baja el código, los vectores y los datos desde GitHub y desde
+los releases de este repo, y GitHub no permite esas descargas sin iniciar sesión si el repositorio es privado. Público, cualquiera puede reproducir la entrega con un
+solo comando, sin credenciales ni permisos. Además, `bravoivanagustin` y `JHK212` están invitados como colaboradores.
