@@ -55,6 +55,15 @@ python verificar_entrega.py --csv-dir entrega --test-raiz test
 
 `python EJECUTABLE.py` hace estos cuatro pasos de una sola vez (instala, baja datos, test y vectores comprobando que no queden cortados, corre el modelo y verifica). Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_NB_colab.ipynb` ([abrirlo en Colab](https://colab.research.google.com/github/AbiFrei/grupo_Luabre/blob/main/ejecutable_NB_colab.ipynb)) es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
 
+> **Cuidado con la instalación.** `EJECUTABLE.py` instala primero `requirements.txt`, que fija versiones exactas (por ejemplo `torch==2.11.0`) y puede tardar o fallar según la versión de Python
+> de cada computadora. Si falla, instalá a mano lo mínimo y corré sin ese paso:
+>
+> ```
+> pip install lightgbm==4.6.0 sentence-transformers==5.7.0 pandas scikit-learn scipy pyarrow
+> python EJECUTABLE.py --sin-pip
+> ```
+> Así se corrió en Colab (con GPU T4), y dio los mismos cinco CSV que la entrega.
+
 ## Validación (sin el test)
 
 `python modelo_ranker_texto.py --todas --cache cache --salida-dir rankings_validacion` entrena con lo anterior a 2024-01-01 y valida en 2024S1;
