@@ -32,7 +32,7 @@ import time
 
 import numpy as np
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
 
 import b0
 import evaluar as ev
@@ -60,9 +60,30 @@ def norm(x: np.ndarray) -> np.ndarray:
     return x / m if m > 0 else x
 
 
+class TfidfEstable(TfidfVectorizer):
+    """TfidfVectorizer con el corte de `max_features` determinista.
+
+    Con `max_features`, scikit-learn se queda con los términos más frecuentes, pero cuando hay empatados en el corte
+    (aquí unos 60.000 términos con frecuencia 2) los desempata con un argsort que no es estable: el resultado puede
+    cambiar con la versión de numpy o con el procesador. Acá se desempata siempre por orden alfabético.
+    El resto (idf, normalización, sublinear_tf) es el de TfidfVectorizer.
+    """
+
+    def fit(self, raw_documents, y=None):
+        docs = list(raw_documents)
+        cv = CountVectorizer(lowercase=self.lowercase, stop_words=self.stop_words,
+                             ngram_range=self.ngram_range, min_df=self.min_df)
+        X = cv.fit_transform(docs)
+        tfs = np.asarray(X.sum(axis=0)).ravel()
+        terminos = cv.get_feature_names_out()                       # orden alfabético
+        elegidos = terminos[np.argsort(-tfs, kind="stable")[:self.max_features]]
+        self.vocabulary = sorted(elegidos.tolist())
+        return super().fit(docs, y)
+
+
 def nuevo_tfidf() -> TfidfVectorizer:
-    return TfidfVectorizer(lowercase=True, stop_words="english", ngram_range=(1, 2),
-                           min_df=2, max_features=100_000, sublinear_tf=True)
+    return TfidfEstable(lowercase=True, stop_words="english", ngram_range=(1, 2),
+                        min_df=2, max_features=100_000, sublinear_tf=True)
 
 
 def puntuar(lics, emp, hist, prior) -> dict:
