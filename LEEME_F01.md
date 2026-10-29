@@ -54,3 +54,17 @@ anteriores está en `resultados.md`.
 | archivo | qué es |
 |---|---|
 | `modelo_ranker_texto.py` | el modelo final: ranker + features de texto, modos A y B, validación y entrega |
+| `modelo_ranker.py` | ranker del historial desarrollado por Luis Morales Rivera; `modelo_ranker_texto.py` lo usa como base |
+| `experimento.py` | TF-IDF determinista (`TfidfEstable`) y la etapa de B0 + texto |
+| `verificar_entrega.py` | comprueba los cinco CSV contra el test antes de entregar |
+| `comparar_modos.py`, `comparar_ranker.py` | comparaciones con IC95 entre modos y contra el ranker sin texto |
+| `simular_test.py` | arma un test simulado con el mismo formato que el oficial, para ensayar el flujo |
+| `prueba_pool.py` | prueba del pool sin LightGBM: cuántas ganadoras entran al pool de 200 |
+| `b0.py`, `evaluar.py` | baseline y evaluador de la cátedra |
+
+## Reproducibilidad
+
+Los desempates y las semillas son fijos (semilla 42; desempate por SHA-256 del id). El vocabulario TF-IDF y los perfiles de
+embeddings de cada empresa se calculan solo con contratos anteriores al período que se predice. En el test se usa el historial
+de `data/` (termina el 30/6/2024) y la tabla de empresas del test, sin `semestre`. Dos corridas independientes dieron el mismo
+pool de entrenamiento y la misma iteración final del LightGBM en cada vertical.
