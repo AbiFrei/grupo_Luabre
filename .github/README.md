@@ -57,7 +57,7 @@ python modelo_ranker_texto.py --todas --cache cache --modo final --test-raiz tes
 python verificar_entrega.py --csv-dir entrega --test-raiz test
 ```
 
-El notebook `ejecutable_limpio.ipynb` hace todo esto en Colab, de los datos a los cinco CSV, y además valida el método.
+Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_limpio.ipynb` es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
 Con `--pool-por-b0` y otra carpeta de salida se obtiene el modo A.
 
 ## Validación (sin el test)
