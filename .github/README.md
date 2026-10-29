@@ -12,14 +12,8 @@ de la cátedra (`b0.py`), que puntúa a cada empresa por su historial de contrat
    Usa el puntaje del B0 y rasgos del historial de cada empresa (`modelo_ranker.py`, desarrollado por Luis Morales Rivera).
 2. **Texto.** Le sumamos como rasgos la similitud entre el texto de la licitación y el de los contratos anteriores de cada empresa, con TF-IDF y
    con embeddings de oraciones (all-MiniLM-L6-v2), absolutas y relativas al resto del pool (`modelo_ranker_texto.py`).
-3. **Pool.** El único cambio entre los dos modos es cómo se elige el pool de 200 que reordena el ranker:
-
-| modo | pool de 200 | cómo se pide |
-|---|---|---|
-| **B** (por defecto, el de la entrega) | las de mejor B0 + similitud de texto | sin banderas, o `--pool-por-texto` |
-| A | las de mejor B0 (solo historial) | `--pool-por-b0` |
-
-El defecto se cambia con la constante `POOL_POR_TEXTO_DEFECTO` al comienzo de `modelo_ranker_texto.py`.
+3. **Pool combinado.** Un ranker solo puede reordenar a quien entró al pool. Por eso el pool de 200 candidatas no se arma con el B0 solo (historial),
+   sino con la combinación de B0 y similitud de texto: así entran más empresas ganadoras al pool que después reordena el LightGBM.
 
 Sin fuga de información: de cada empresa solo se mira lo anterior a la licitación, y el vocabulario del texto y los perfiles de embeddings
 se arman solo con contratos anteriores al período que se predice.
@@ -28,11 +22,13 @@ se arman solo con contratos anteriores al período que se predice.
 
 Se entrena con las licitaciones anteriores al 1/1/2024 y se valida en 2024S1: 2000 licitaciones de las cinco verticales juntas.
 
-| | B0 | modo A | modo B | B menos A (IC95 por bootstrap pareado) |
-|---|--:|--:|--:|---|
-| MRR | 0,139 | 0,258 | 0,273 | +0,014 (+0,005 a +0,024) |
+| método | MRR | diferencia (IC95 por bootstrap pareado) |
+|---|--:|---|
+| B0 (baseline de la cátedra) | 0,139 | |
+| ranker del historial, sin texto | 0,172 | +0,032 sobre B0 (+0,025 a +0,040) |
+| **método final: ranker + texto, pool combinado** | **0,273** | +0,101 sobre el ranker sin texto (+0,088 a +0,115) |
 
-El detalle por vertical y los experimentos anteriores (TF-IDF, embeddings, SVD, lematizado, top protegido) están en `resultados.md` y en el informe.
+El detalle por vertical, la comparación con otras variantes y los experimentos anteriores (TF-IDF, embeddings, SVD, lematizado, top protegido) están en el informe y en `resultados.md`.
 
 ## Reproducir las predicciones del test
 
@@ -58,24 +54,23 @@ python verificar_entrega.py --csv-dir entrega --test-raiz test
 ```
 
 `python EJECUTABLE.py` hace estos cuatro pasos de una sola vez (instala, baja datos, test y vectores comprobando que no queden cortados, corre el modelo y verifica). Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_NB_colab.ipynb` ([abrirlo en Colab](https://colab.research.google.com/github/AbiFrei/grupo_Luabre/blob/main/ejecutable_NB_colab.ipynb)) es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
-Con `--pool-por-b0` y otra carpeta de salida se obtiene el modo A.
 
 ## Validación (sin el test)
 
 `python modelo_ranker_texto.py --todas --cache cache --salida-dir rankings_validacion` entrena con lo anterior a 2024-01-01 y valida en 2024S1;
-con `--corte 2023-07-01` se mueve la ventana. `python comparar_modos.py --a <carpeta modo A> --b <carpeta modo B>` compara los dos modos
-(MRR y diferencia con IC95). `python simular_test.py` arma un test simulado con el mismo formato que el oficial para ensayar el flujo.
+con `--corte 2023-07-01` se mueve la ventana. `comparar_ranker.py` compara con el ranker sin texto (MRR y diferencia con IC95).
+`python simular_test.py` arma un test simulado con el mismo formato que el oficial para ensayar el flujo.
 
 ## Archivos
 
 | archivo | qué es |
 |---|---|
-| `modelo_ranker_texto.py` | el modelo final: ranker + features de texto, modos A y B, validación y entrega |
+| `modelo_ranker_texto.py` | el modelo final: ranker + features de texto con pool combinado, validación y entrega |
 | `modelo_ranker.py` | ranker del historial desarrollado por Luis Morales Rivera; `modelo_ranker_texto.py` lo usa como base |
 | `experimento.py` | TF-IDF determinista (`TfidfEstable`) y la etapa de B0 + texto |
 | `verificar_entrega.py` | comprueba los cinco CSV contra el test antes de entregar |
 | `EJECUTABLE.py` | corre toda la entrega de punta a punta con un solo comando, sin Colab |
-| `comparar_modos.py`, `comparar_ranker.py` | comparaciones con IC95 entre modos y contra el ranker sin texto |
+| `comparar_ranker.py` | compara el método con el ranker sin texto y con B0 (MRR y diferencia con IC95) |
 | `simular_test.py` | arma un test simulado con el formato del test oficial |
 | `prueba_pool.py` | cuántas ganadoras entran al pool de 200 según cómo se elige |
 | `experimento_emb.py`, `experimento_top.py`, `analisis_alpha.py`, `pipeline_tfidf.py` | experimentos de la primera etapa (B0 + texto) |
