@@ -27,7 +27,7 @@ python modelo_ranker_texto.py --todas --cache cache --modo final --test-raiz tes
 python verificar_entrega.py --csv-dir entrega --test-raiz test
 ```
 
-Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_limpio.ipynb` es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
+`python EJECUTABLE.py` hace estos cuatro pasos de una sola vez (instala, baja datos, test y vectores comprobando que no queden cortados, corre el modelo y verifica). Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_NB_colab.ipynb` es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
 
 ## Los dos modos
 
@@ -57,6 +57,7 @@ anteriores está en `resultados.md`.
 | `modelo_ranker.py` | ranker del historial desarrollado por Luis Morales Rivera; `modelo_ranker_texto.py` lo usa como base |
 | `experimento.py` | TF-IDF determinista (`TfidfEstable`) y la etapa de B0 + texto |
 | `verificar_entrega.py` | comprueba los cinco CSV contra el test antes de entregar |
+| `EJECUTABLE.py` | corre toda la entrega de punta a punta con un solo comando, sin Colab |
 | `comparar_modos.py`, `comparar_ranker.py` | comparaciones con IC95 entre modos y contra el ranker sin texto |
 | `simular_test.py` | arma un test simulado con el mismo formato que el oficial, para ensayar el flujo |
 | `prueba_pool.py` | prueba del pool sin LightGBM: cuántas ganadoras entran al pool de 200 |
