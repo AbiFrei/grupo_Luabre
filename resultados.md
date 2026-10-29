@@ -3,7 +3,7 @@
 Registro de cada experimento: qué se probó, con qué configuración y qué métricas dio.
 Se agrega una sección por experimento. Es la base del informe de enfoques estudiados.
 
-## Experimentación 0 (notebook: celdas #7 a #13): B0 + TF-IDF (vertical `rd`)
+## Experimentación 0: B0 + TF-IDF (vertical `rd`)
 
 **Configuración**
 - Vertical: `rd` (328 licitaciones en total).
@@ -12,7 +12,7 @@ Se agrega una sección por experimento. Es la base del informe de enfoques estud
 - Texto de la licitación: `title` + `description`.
 - TF-IDF: `stop_words="english"`, `ngram_range=(1,2)`, `min_df=2`, `sublinear_tf=True`; vocabulario aprendido solo con contratos anteriores al 2024-01-01.
 - Puntaje final: `norm(p_b0) + alpha * norm(similitud_coseno)`, top 100.
-- Código: `python pipeline_tfidf.py --datos data/rd`
+- Código: primera versión, solo para `rd` (reemplazada por `experimento.py`, que hace lo mismo en las cinco verticales; ver la Experimentación vi).
 
 **Referencia: B0 sobre todo `rd` (coincide con el README)**
 
@@ -72,7 +72,7 @@ por bootstrap pareado (remuestreando licitaciones).
 - alpha = 0,5 se eligió mirando esta misma validación, así que el +0,024 es algo optimista.
   Próximo paso: elegir alpha con 2023 y medir una sola vez en 2024S1.
 
-## Experimentación i (notebook: celdas #14 a #18): validación cronológica (selección 2023, prueba 2024S1) — vertical `rd`
+## Experimentación i: validación cronológica (selección 2023, prueba 2024S1) — vertical `rd`
 
 **Esquema**
 - Selección: licitaciones de 2023 (130 licitaciones, 217 ganadoras). Se usa para elegir alpha.
@@ -110,7 +110,7 @@ por bootstrap pareado (remuestreando licitaciones).
 - Próximos pasos: variantes de la representación del texto (lematizar, SVD, embeddings, comparar contrato
   por contrato) con este mismo esquema, y repetir en una vertical grande para achicar los intervalos.
 
-## Experimentación ii (notebook: celdas #19 a #23): lematizar y recortar a la raíz — vertical `rd`
+## Experimentación ii: lematizar y recortar a la raíz — vertical `rd`
 
 **Qué se probó.** TF-IDF compara palabras exactas ("service" y "services" son términos distintos).
 Se probaron dos formas de normalizar las palabras al tokenizar, antes de armar los vectores:
@@ -140,7 +140,7 @@ el TF-IDF base licitación por licitación (IC95 por bootstrap pareado). Se adop
 - Conclusión: las diferencias de forma de las palabras no son el problema principal del texto.
   La hipótesis siguiente es un problema de significado (sinónimos, temas): SVD y embeddings.
 
-## Experimentación iii (notebook: celdas #24 a #27): SVD (temas) — vertical `rd`
+## Experimentación iii: SVD (temas) — vertical `rd`
 
 **Qué se probó.** SVD/LSA sobre el TF-IDF de los contratos del pasado: cada texto se representa por "temas"
 (combinaciones de palabras que aparecen juntas) en lugar de palabras exactas. Variantes: SVD 100 y SVD 300 en lugar
