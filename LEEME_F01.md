@@ -1,7 +1,7 @@
 # Grupo F01: solución y cómo reproducir las predicciones
 
 Método: **ranker de historial (LightGBM, lambdarank) + features de texto** (similitud TF-IDF y embeddings MiniLM),
-sobre un pool de 200 candidatas por licitación elegido con B0 + texto (modo B, el de la entrega).
+sobre un pool combinado de 200 candidatas por licitación, elegido con B0 + similitud de texto.
 Integrantes: Luis Fernando Morales Rivera, Abigail Freijomil y Rebecca Lis Salvati.
 
 ## Reproducir las predicciones del test (lo mínimo)
@@ -29,36 +29,29 @@ python verificar_entrega.py --csv-dir entrega --test-raiz test
 
 `python EJECUTABLE.py` hace estos cuatro pasos de una sola vez (instala, baja datos, test y vectores comprobando que no queden cortados, corre el modelo y verifica). Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_NB_colab.ipynb` ([abrirlo en Colab](https://colab.research.google.com/github/AbiFrei/grupo_Luabre/blob/main/ejecutable_NB_colab.ipynb)) es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
 
-## Los dos modos
+## El pool combinado
 
-El único cambio entre ellos es cómo se elige el pool de 200 candidatas que reordena el LightGBM:
-
-| modo | pool de 200 | cómo se pide |
-|---|---|---|
-| **B** (por defecto) | las de mejor B0 + similitud de texto | sin banderas, o `--pool-por-texto` |
-| A | las de mejor B0 (solo historial) | `--pool-por-b0` |
-
-El defecto se cambia con la constante `POOL_POR_TEXTO_DEFECTO` al comienzo de `modelo_ranker_texto.py`.
-Los resultados del modo A salen de agregar `--pool-por-b0` y otra carpeta de salida.
+Un ranker solo puede reordenar a quien entró al pool. El pool de 200 candidatas por licitación no se arma con el B0 solo (historial), sino con la
+combinación de B0 y similitud de texto (TF-IDF y embeddings), de modo que entran más ganadoras al pool que reordena el LightGBM.
 
 ## Validación (sin el test)
 
 `python modelo_ranker_texto.py --todas --cache cache --salida-dir rankings_validacion` entrena con lo anterior a 2024-01-01 y
-valida en 2024S1; con `--corte 2023-07-01` se mueve la ventana. `python comparar_modos.py --a <carpeta modo A> --b <carpeta modo B>`
-compara los dos modos (MRR y diferencia con IC95 por bootstrap pareado). Resultados de la validación 2024S1, cinco verticales juntas
-(2000 licitaciones): B0 0,139, modo A 0,258, modo B 0,273 (B menos A: +0,014, IC95 +0,005 a +0,024). El detalle de los experimentos
-anteriores está en `resultados.md`.
+valida en 2024S1; con `--corte 2023-07-01` se mueve la ventana. Resultados de la validación 2024S1, cinco verticales juntas (2000 licitaciones):
+B0 0,139; ranker del historial sin texto 0,172; método final (ranker + texto, pool combinado) 0,273 (+0,101 sobre el ranker sin texto, IC95 por
+bootstrap pareado +0,088 a +0,115). `comparar_ranker.py` hace la comparación con el ranker sin texto. El detalle por vertical y los
+experimentos anteriores están en el informe y en `resultados.md`.
 
 ## Archivos
 
 | archivo | qué es |
 |---|---|
-| `modelo_ranker_texto.py` | el modelo final: ranker + features de texto, modos A y B, validación y entrega |
+| `modelo_ranker_texto.py` | el modelo final: ranker + features de texto con pool combinado, validación y entrega |
 | `modelo_ranker.py` | ranker del historial desarrollado por Luis Morales Rivera; `modelo_ranker_texto.py` lo usa como base |
 | `experimento.py` | TF-IDF determinista (`TfidfEstable`) y la etapa de B0 + texto |
 | `verificar_entrega.py` | comprueba los cinco CSV contra el test antes de entregar |
 | `EJECUTABLE.py` | corre toda la entrega de punta a punta con un solo comando, sin Colab |
-| `comparar_modos.py`, `comparar_ranker.py` | comparaciones con IC95 entre modos y contra el ranker sin texto |
+| `comparar_ranker.py` | compara el método con el ranker sin texto y con B0 (MRR y diferencia con IC95) |
 | `simular_test.py` | arma un test simulado con el mismo formato que el oficial, para ensayar el flujo |
 | `prueba_pool.py` | prueba del pool sin LightGBM: cuántas ganadoras entran al pool de 200 |
 | `b0.py`, `evaluar.py` | baseline y evaluador de la cátedra |
