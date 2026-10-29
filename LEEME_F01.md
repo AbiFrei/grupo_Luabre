@@ -27,7 +27,7 @@ python modelo_ranker_texto.py --todas --cache cache --modo final --test-raiz tes
 python verificar_entrega.py --csv-dir entrega --test-raiz test
 ```
 
-`python EJECUTABLE.py` hace estos cuatro pasos de una sola vez (instala, baja datos, test y vectores comprobando que no queden cortados, corre el modelo y verifica). Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_NB_colab.ipynb` es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
+`python EJECUTABLE.py` hace estos cuatro pasos de una sola vez (instala, baja datos, test y vectores comprobando que no queden cortados, corre el modelo y verifica). Los comandos de arriba son el camino principal para reproducir: funcionan en cualquier computadora con Python. El notebook `ejecutable_NB_colab.ipynb` ([abrirlo en Colab](https://colab.research.google.com/github/AbiFrei/grupo_Luabre/blob/main/ejecutable_NB_colab.ipynb)) es solo una comodidad: hace lo mismo en Colab, de los datos a los cinco CSV, y además valida el método. Se ofrece porque la codificación del texto con MiniLM necesita una GPU para tardar minutos y no horas, y Colab la presta gratis (T4); no hace nada que los comandos no hagan.
 
 ## Los dos modos
 
